@@ -1,4 +1,5 @@
 import {
+  APP_INITIALIZER,
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
@@ -6,13 +7,17 @@ import {
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
-
 import { providePrimeNG } from 'primeng/config';
+
 import Aura from '@primeuix/themes/aura';
 
 import { routes } from './app.routes';
-//import { provideForms } from '@angular/forms';
+import {KeycloakService} from './services/keycloakService';
 
+//import { provideForms } from '@angular/forms';
+export function initializeKeycloak(keycloakService: KeycloakService) {
+  return (): Promise<any> => keycloakService.init();
+}
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
@@ -26,5 +31,11 @@ export const appConfig: ApplicationConfig = {
     }),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeKeycloak,
+      deps: [KeycloakService],
+      multi: true,
+    },
   ],
 };
